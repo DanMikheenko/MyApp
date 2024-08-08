@@ -11,13 +11,20 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
-    companion object{
+    companion object {
         private const val REFRESH_RATE = 1_000L
     }
-    private var mainThreadHandler : Handler? = null
-    private var seconds : Int = 0
+
+    private lateinit var editText : EditText
+    private lateinit var startButton : Button
+    private lateinit var timerTextView : TextView
+
+    private var mainThreadHandler = Handler(Looper.getMainLooper())
+    private var remainingSeconds: Int = 0
+    private var runnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,28 +36,31 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        mainThreadHandler = Handler(Looper.getMainLooper())
-        val editText = findViewById<EditText>(R.id.edit_text_id)
+        editText = findViewById<EditText>(R.id.edit_text_id)
+        timerTextView = findViewById<TextView>(R.id.timeTextView)
 
-        val startButton = findViewById<Button>(R.id.start_button)
+        startButton = findViewById<Button>(R.id.start_button)
         startButton.setOnClickListener {
-            seconds = editText.text as Int
-           //  mainThreadHandler.post()
-            startButton.isEnabled = false
+            val input = editText.text.toString()
+            if (input.isNotEmpty()) {
+                remainingSeconds = input.toInt()
+
+                runnable = object : Runnable{
+                    override fun run() {
+                        if (remainingSeconds>0){
+                            timerTextView.text = remainingSeconds.toString()
+                            remainingSeconds--
+                            mainThreadHandler.postDelayed(this, 1000)
+                        } else{
+                            timerTextView.text = "Done!"
+                        }
+
+                    }
+                }
+                mainThreadHandler.post(runnable!!)
+
+                timerTextView.visibility = View.VISIBLE
+            }
         }
-    }
-
-
-
-    private fun refreshTime(){
-        val editText = findViewById<EditText>(R.id.edit_text_id)
-        val timeTextView = findViewById<TextView>(R.id.timeTextView)
-        var seconds = editText.text as Int
-        for (i in seconds downTo 0){
-            timeTextView.text = seconds as String
-            seconds--
-        }
-        timeTextView.visibility = View.VISIBLE
-
     }
 }
