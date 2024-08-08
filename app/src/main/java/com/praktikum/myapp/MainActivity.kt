@@ -11,13 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.transition.Visibility
 import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private const val REFRESH_RATE = 1_000L
-    }
-
     private lateinit var editText : EditText
     private lateinit var startButton : Button
     private lateinit var timerTextView : TextView
@@ -41,6 +38,8 @@ class MainActivity : AppCompatActivity() {
 
         startButton = findViewById<Button>(R.id.start_button)
         startButton.setOnClickListener {
+            startButton.isEnabled = false
+            timerTextView.visibility = View.VISIBLE
             val input = editText.text.toString()
             if (input.isNotEmpty()) {
                 remainingSeconds = input.toInt()
